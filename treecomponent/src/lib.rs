@@ -11,6 +11,22 @@ impl TreeNodeInfo {
         TreeNodeInfo { label: String::from(label), children }
     }
 }
+macro_rules! tree {
+    {} => { Vec::new::<Vec<RwSignal<TreeNodeInfo>>>() }
+}
+macro_rules! tree {
+    [$({$l:literal, $e: expr}),*] => {
+        {
+            let mut tree: Vec<RwSignal<TreeNodeInfo>> = vec![];
+        
+            $(
+                tree.push(RwSignal::new(TreeNodeInfo::new($l, $e)));
+            )*
+            
+            tree
+    }
+    }
+}
 
 #[component]
 fn TreeNode(node: TreeNodeInfo) -> impl IntoView {
@@ -39,10 +55,10 @@ fn Tree(nodes: Vec<RwSignal<TreeNodeInfo>>) -> impl IntoView {
 
 #[component]
 pub fn App() -> impl IntoView {
-    let tree = vec![
-        RwSignal::new(TreeNodeInfo::new("1", vec![RwSignal::new(TreeNodeInfo::new("1-1", vec![]))])),
-        RwSignal::new(TreeNodeInfo::new("2", vec![])),
-        RwSignal::new(TreeNodeInfo::new("3", vec![])),
+    let tree = tree![
+        {"1", tree![{"1-1", tree![]}, {"1-2", tree![]}]},
+        {"2", tree![]},
+        {"3", tree![]}
     ];
     view! {
         <Tree nodes={tree} />
